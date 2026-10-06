@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Matriks - Matematika Tingkat Lanjut</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- KaTeX CSS & JS for LaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .katex-display { margin: 0.5em 0; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.7); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-200">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-600 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-calculator text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">Kuis Matriks Interaktif</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Matematika Tingkat Lanjut — Lengkap Berdasarkan Gambar</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button id="themeToggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Ubah Tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+                <button id="soundToggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Efek Suara">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button id="restartBtn" class="px-3 py-1.5 text-xs sm:text-sm font-medium bg-brand-50 text-brand-700 dark:bg-slate-700 dark:text-brand-300 rounded-lg hover:bg-brand-100 dark:hover:bg-slate-600 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Ulangi Kuis</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+        <!-- Stat Overview Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3">
+                <div class="p-3 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg">
+                    <i class="fa-solid fa-list-check text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Progres Soal</div>
+                    <div class="text-lg font-bold text-slate-800 dark:text-slate-100" id="progressText">1 / 12</div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3">
+                <div class="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                    <i class="fa-solid fa-circle-check text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Skor Saat Ini</div>
+                    <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400" id="scoreText">0 / 0</div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3">
+                <div class="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg">
+                    <i class="fa-solid fa-clock text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Waktu Mengerjakan</div>
+                    <div class="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono" id="timerText">00:00</div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3">
+                <div class="p-3 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
+                    <i class="fa-solid fa-bullseye text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Akurasi</div>
+                    <div class="text-lg font-bold text-purple-600 dark:text-purple-400" id="accuracyText">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden shadow-inner">
+            <div id="progressBar" class="bg-brand-600 h-full transition-all duration-300 ease-out" style="width: 8.33%;"></div>
+        </div>
+
+        <!-- Filter / Nav Categories -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+            <button class="category-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-brand-600 text-white shadow-sm transition" data-filter="all">Semua Soal (12)</button>
+            <button class="category-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" data-filter="gambar1">Gambar 1 (Konser)</button>
+            <button class="category-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" data-filter="gambar2">Gambar 2 (Arsitek)</button>
+            <button class="category-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" data-filter="gambar3">Gambar 3 (Tekstil)</button>
+            <button class="category-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" data-filter="serupa">Soal Serupa (3)</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            
+            <!-- Question Box (Main Content - 3 cols) -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-200">
+                    
+                    <!-- Question Header & Tag -->
+                    <div class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span id="questionCategoryTag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                                Gambar 1 - Pertanyaan 1
+                            </span>
+                            <span id="questionTypeTag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                Pilihan Ganda
+                            </span>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-flag"></i> Soal <span id="currentQNum">1</span> dari <span id="totalQNum">12</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Content Area -->
+                    <div class="p-6 sm:p-8 space-y-6">
+
+                        <!-- Context Reading Text Box -->
+                        <div id="readingContextBox" class="bg-slate-50 dark:bg-slate-900/60 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700/80 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                            <!-- Injected dynamically -->
+                        </div>
+
+                        <!-- Specific Question Text -->
+                        <div class="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 leading-snug" id="questionTitle">
+                            <!-- Question Text -->
+                        </div>
+
+                        <!-- Options Container -->
+                        <div id="optionsContainer" class="space-y-3 pt-2">
+                            <!-- Options Injected dynamically -->
+                        </div>
+
+                        <!-- Feedback Banner (Correct / Incorrect) -->
+                        <div id="feedbackBox" class="hidden rounded-xl p-4 sm:p-5 border text-sm leading-relaxed transition-all duration-300">
+                            <!-- Feedback message and explanation dynamically loaded -->
+                        </div>
+
+                    </div>
+
+                    <!-- Question Footer / Actions -->
+                    <div class="bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between gap-3">
+                        <button id="prevBtn" class="px-4 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <div class="flex items-center gap-2">
+                            <button id="submitBtn" class="px-5 py-2 rounded-xl text-sm font-medium bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Periksa Jawaban</span>
+                            </button>
+                            <button id="nextBtn" class="px-5 py-2 rounded-xl text-sm font-medium bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+                                <span>Lanjut</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Question Grid Navigator Sidebar (1 col) -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-grid-2 text-brand-600"></i> Navigasi Soal
+                        </h3>
+                        <span class="text-xs text-slate-500 dark:text-slate-400" id="answeredCount">0/12 Selesai</span>
+                    </div>
+
+                    <!-- Grid Buttons -->
+                    <div id="questionGrid" class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-3 gap-2">
+                        <!-- Dynamic Buttons -->
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-700 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-brand-600 inline-block"></span>
+                            <span>Sedang Dikerjakan</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                            <span>Benar</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                            <span>Salah</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-700 inline-block"></span>
+                            <span>Belum Dijawab</span>
+                        </div>
+                    </div>
+
+                    <button id="finishQuizBtn" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-solid fa-flag-checkered"></i>
+                        <span>Selesaikan Kuis</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 transform scale-95 transition-transform duration-300" id="resultModalCard">
+            
+            <div class="text-center space-y-2">
+                <div id="resultIcon" class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg">
+                    <!-- Icon injected -->
+                </div>
+                <h2 id="resultTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Hasil Kuis Anda</h2>
+                <p id="resultSubtitle" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Berikut adalah rekapitulasi performa Anda dalam kuis matriks ini.</p>
+            </div>
+
+            <!-- Score Cards -->
+            <div class="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-center">
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Skor Akhir</div>
+                    <div class="text-2xl font-bold text-brand-600 dark:text-brand-400" id="finalScoreVal">0</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Jawaban Benar</div>
+                    <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400" id="finalCorrectVal">0 / 12</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Waktu Total</div>
+                    <div class="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono" id="finalTimeVal">00:00</div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis text -->
+            <div id="resultFeedbackText" class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 text-center">
+                <!-- Injected text -->
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button id="closeModalBtn" class="flex-1 py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    Tutup & Tinjau Soal
+                </button>
+                <button id="modalRestartBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Coba Lagi</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            // ==================== GAMBAR 1 ====================
+            {
+                id: 1,
+                filterCategory: "gambar1",
+                categoryTitle: "Gambar 1 - Pertanyaan 1",
+                type: "single",
+                context: "<strong>Teks 1 (Cermati uraian berikut untuk menjawab pertanyaan 1-3):</strong><br>Seorang jasa penjualan tiket konser sedang mencatat hasil pembelian tiket suatu konser yang terdiri dari dua <em>seating plan</em> yaitu Cat 2 dan Cat 3. Berdasarkan catatan, harga beli 2 tiket Cat 2 dan 3 tiket Cat 3 seharga $\\text{Rp}5.000.000,00$, sedangkan 1 tiket Cat 2 dan 2 tiket Cat 3 seharga $\\text{Rp}3.000.000,00$. Untuk memudahkan pencatatan dan perhitungan harga satuan tiap tiket, ia memodelkan masalah tersebut ke dalam persamaan matriks $AX = B$.",
+                question: "Jika tiket Cat 2 adalah $x$ dan tiket Cat 3 adalah $y$, persamaan matriks yang memenuhi keadaan tersebut adalah ....",
+                options: [
+                    "$\\begin{pmatrix} 2 & 1 \\\\ 3 & 2 \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 1 & 3 \\\\ 2 & 2 \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & 1 \\\\ 3 & 2 \\end{pmatrix} \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix} \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$"
+                ],
+                correctAnswer: 2, // Index C
+                explanation: "<strong>Pembahasan:</strong><br>Dari teks diperoleh dua persamaan:<br>1) $2x + 3y = 5.000.000$<br>2) $1x + 2y = 3.000.000$<br><br>Dalam bentuk matriks $AX = B$:<br>$\\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$. Jadi pilihan yang tepat adalah <strong>C</strong>."
+            },
+            {
+                id: 2,
+                filterCategory: "gambar1",
+                categoryTitle: "Gambar 1 - Pertanyaan 2",
+                type: "single",
+                context: "<strong>Teks 1 (Sambungan Gambar 1):</strong><br>Berdasarkan model matriks pada Pertanyaan 1, diperoleh matriks koefisien $A = \\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix}$ dan matriks konstanta $B = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$.",
+                question: "Invers matriks $A$ ($A^{-1}$) untuk mencari nilai $x$ dan $y$ adalah ....",
+                options: [
+                    "$\\begin{pmatrix} 2 & -3 \\\\ -1 & 2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & -1 \\\\ -3 & 2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} -2 & 3 \\\\ 1 & -2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} -2 & 1 \\\\ 3 & -2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & 3 \\\\ -1 & 2 \\end{pmatrix}$"
+                ],
+                correctAnswer: 0, // Index A
+                explanation: "<strong>Pembahasan:</strong><br>Matriks $A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} = \\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix}$.<br>Determinan $\\det(A) = ad - bc = (2)(2) - (3)(1) = 4 - 3 = 1$.<br><br>Rumus invers matriks $2 \\times 2$:<br>$A^{-1} = \\frac{1}{\\det(A)} \\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix} = \\frac{1}{1} \\begin{pmatrix} 2 & -3 \\\\ -1 & 2 \\end{pmatrix} = \\begin{pmatrix} 2 & -3 \\\\ -1 & 2 \\end{pmatrix}$. Jawaban: <strong>A</strong>."
+            },
+            {
+                id: 3,
+                filterCategory: "gambar1",
+                categoryTitle: "Gambar 1 - Pertanyaan 3",
+                type: "single",
+                context: "<strong>Teks 1 (Analisis Pernyataan Tiket Konser):</strong><br>Berdasarkan informasi yang didapat dari uraian Teks 1 Gambar 1 tentang sistem persamaaan matriks penjualan tiket konser.",
+                question: "Berdasarkan uraian tersebut, manakah pernyataan berikut yang BENAR?",
+                options: [
+                    "Matriks $A$ berordo $2 \\times 3$.",
+                    "Elemen $a_{12}$ mewakili jumlah tiket Cat 3 pada persamaan pertama.",
+                    "Nilai determinan dari matriks $A$ adalah 2.",
+                    "Matriks $B$ adalah matriks baris.",
+                    "Persamaan tidak memiliki solusi tunggal."
+                ],
+                correctAnswer: 1, // Index B
+                explanation: "<strong>Pembahasan Analisis Pernyataan:</strong><br>• Matriks $A = \\begin{pmatrix} 2 & 3 \\\\ 1 & 2 \\end{pmatrix}$ berordo $2 \\times 2$ (Bukan $2 \\times 3$).<br>• Elemen $a_{12}$ terletak pada baris 1 kolom 2 yaitu angka 3, yang mewakili koefisien/jumlah tiket Cat 3 pada persamaan pertama. (<strong>BENAR</strong>)<br>• Determinan $\\det(A) = 1$ (Bukan 2).<br>• Matriks $B = \\begin{pmatrix} 5.000.000 \\\\ 3.000.000 \\end{pmatrix}$ berordo $2 \\times 1$ yaitu matriks kolom (Bukan matriks baris)."
+            },
+
+            // ==================== GAMBAR 2 ====================
+            {
+                id: 4,
+                filterCategory: "gambar2",
+                categoryTitle: "Gambar 2 - Pertanyaan 1",
+                type: "single",
+                context: "<strong>Teks 1 (Cermati uraian berikut untuk menjawab pertanyaan 1-3):</strong><br>Seorang arsitek sedang merancang struktur kekuatan pondasi untuk sebuah gedung perkantoran tiga lantai. Dalam rancangannya, beban yang diterima pada sembilan titik pondasi utama disusun secara sistematis ke dalam sebuah matriks $A$ berukuran $3 \\times 3$:<br><div class='text-center my-2'>$A = \\begin{pmatrix} 1 & 0 & 2 \\\\ 2 & 1 & 3 \\\\ 0 & 0 & 1 \\end{pmatrix}$</div>",
+                question: "Determinan matriks $A$ adalah ....",
+                options: ["0", "1", "2", "3", "5"],
+                correctAnswer: 1, // Index B (1)
+                explanation: "<strong>Pembahasan:</strong><br>Ekspansi Kofaktor sepanjang baris ke-3 dari matriks $A = \\begin{pmatrix} 1 & 0 & 2 \\\\ 2 & 1 & 3 \\\\ 0 & 0 & 1 \\end{pmatrix}$:<br>$\\det(A) = 0 - 0 + 1 \\cdot \\det\\begin{pmatrix} 1 & 0 \\\\ 2 & 1 \\end{pmatrix} = 1 \\cdot ((1)(1) - (0)(2)) = 1$. Jawaban: <strong>B</strong>."
+            },
+            {
+                id: 5,
+                filterCategory: "gambar2",
+                categoryTitle: "Gambar 2 - Pertanyaan 2",
+                type: "single",
+                context: "<strong>Teks 1 (Sambungan Gambar 2):</strong><br>Diketahui matriks beban $A = \\begin{pmatrix} 1 & 0 & 2 \\\\ 2 & 1 & 3 \\\\ 0 & 0 & 1 \\end{pmatrix}$ berordo $n = 3$ dengan nilai determinan $\\det(A) = 1$.",
+                question: "Jika matriks beban tersebut dikalikan dengan faktor penguatan $k = 3$, maka determinan matriks $3A$ adalah ....",
+                options: ["3", "9", "27", "54", "81"],
+                correctAnswer: 2, // Index C (27)
+                explanation: "<strong>Pembahasan Sifat Determinan Skalar:</strong><br>Untuk matriks $A$ berordo $n \\times n$ dan skalar $k$, berlaku sifat:<br>$\\det(k A) = k^n \\cdot \\det(A)$<br><br>Sebab ordo $n = 3$ dan $k = 3$:<br>$\\det(3A) = 3^3 \\cdot \\det(A) = 27 \\cdot 1 = 27$. Jawaban: <strong>C</strong>."
+            },
+            {
+                id: 6,
+                filterCategory: "gambar2",
+                categoryTitle: "Gambar 2 - Pertanyaan 3",
+                type: "single",
+                context: "<strong>Teks 1 (Analisis Pernyataan Beban Gedung):</strong><br>Berdasarkan informasi matriks $A = \\begin{pmatrix} 1 & 0 & 2 \\\\ 2 & 1 & 3 \\\\ 0 & 0 & 1 \\end{pmatrix}$.",
+                question: "Berdasarkan matriks beban $A$, manakah pernyataan berikut yang BENAR?",
+                options: [
+                    "Nilai elemen $a_{22}$ sama dengan hasil penjumlahan $a_{11}$ dan $a_{33}$.",
+                    "Jika $A$ dikalikan faktor $k = 5$, maka determinan menjadi 5 kali lipat dari determinan aslinya.",
+                    "Hasil dari $A + A^T$ menghasilkan matriks simetris di mana elemen $a_{12}$ sama dengan $a_{21}$.",
+                    "Matriks $A$ memiliki elemen nol lebih banyak pada bagian bawah diagonal utama.",
+                    "Jika baris pertama dan baris ketiga ditukar posisinya, nilai determinan matriks baru sama dengan aslinya."
+                ],
+                correctAnswer: 2, // Index C
+                explanation: "<strong>Pembahasan:</strong><br>Transpose $A^T = \\begin{pmatrix} 1 & 2 & 0 \\\\ 0 & 1 & 0 \\\\ 2 & 3 & 1 \\end{pmatrix}$.<br>$A + A^T = \\begin{pmatrix} 1+1 & 0+2 & 2+0 \\\\ 2+0 & 1+1 & 3+0 \\\\ 0+2 & 0+3 & 1+1 \\end{pmatrix} = \\begin{pmatrix} 2 & 2 & 2 \\\\ 2 & 2 & 3 \\\\ 2 & 3 & 2 \\end{pmatrix}$.<br>Terlihat elemen $a_{12} = 2$ dan $a_{21} = 2$. Hasil penjumlahan matriks dengan transposnya selalu menghasilkan <strong>matriks simetris</strong> ($a_{ij} = a_{ji}$). Jawaban: <strong>C</strong>."
+            },
+
+            // ==================== GAMBAR 3 ====================
+            {
+                id: 7,
+                filterCategory: "gambar3",
+                categoryTitle: "Gambar 3 - Pertanyaan 1",
+                type: "single",
+                context: "<strong>Teks 1 (Cermati uraian berikut untuk menjawab pertanyaan 1-3):</strong><br>Di sebuah kawasan industri di Kota Bandung, sebuah pabrik tekstil mengelola dua cabang produksi dengan fokus pada kain katun dan sutra. Pada Cabang A tercatat produksi kain katun terdiri atas 20 kodi standar dan 15 kodi premium, sedangkan sutra 10 kodi standar dan 25 kodi premium, yang disusun ke matriks $P = \\begin{pmatrix} 20 & 15 \\\\ 10 & 25 \\end{pmatrix}$.<br>Pada saat yang sama, Cabang B mencatat produksi kain katun sebanyak 12 kodi standar dan 18 kodi premium, serta sutra 15 kodi standar dan 20 kodi premium ke matriks $Q = \\begin{pmatrix} 12 & 18 \\\\ 15 & 20 \\end{pmatrix}$.",
+                question: "Matriks total produksi dari kedua cabang tersebut $(P + Q)$ adalah ....",
+                options: [
+                    "$\\begin{pmatrix} 32 & 33 \\\\ 25 & 45 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 32 & 33 \\\\ 35 & 45 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 22 & 33 \\\\ 25 & 45 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 32 & 23 \\\\ 25 & 45 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 32 & 33 \\\\ 25 & 35 \\end{pmatrix}$"
+                ],
+                correctAnswer: 0, // Index A
+                explanation: "<strong>Pembahasan Penjumlahan Matriks:</strong><br>$P + Q = \\begin{pmatrix} 20 & 15 \\\\ 10 & 25 \\end{pmatrix} + \\begin{pmatrix} 12 & 18 \\\\ 15 & 20 \\end{pmatrix} = \\begin{pmatrix} 20+12 & 15+18 \\\\ 10+15 & 25+20 \\end{pmatrix} = \\begin{pmatrix} 32 & 33 \\\\ 25 & 45 \\end{pmatrix}$. Jawaban: <strong>A</strong>."
+            },
+            {
+                id: 8,
+                filterCategory: "gambar3",
+                categoryTitle: "Gambar 3 - Pertanyaan 2",
+                type: "single",
+                context: "<strong>Teks 1 (Sambungan Gambar 3):</strong><br>Matriks $P = \\begin{pmatrix} 20 & 15 \\\\ 10 & 25 \\end{pmatrix}$ dan $Q = \\begin{pmatrix} 12 & 18 \\\\ 15 & 20 \\end{pmatrix}$<br>(Baris 1 = Katun, Baris 2 = Sutra; Kolom 1 = Standar, Kolom 2 = Premium).",
+                question: "Jika produksi di Cabang A meningkat dua kali lipat pada bulan kedua, maka banyak kain katun premium yang diproduksi oleh seluruh pabrik tekstil tersebut adalah ... kodi.",
+                options: ["24", "30", "32", "33", "48"],
+                correctAnswer: 4, // Index E (48)
+                explanation: "<strong>Pembahasan:</strong><br>• Kain Katun Premium berada pada Baris 1 Kolom 2.<br>• Pada Cabang A: elemen $p_{12} = 15$ kodi. Meningkat 2 kali lipat $\\implies 2 \\times 15 = 30$ kodi.<br>• Pada Cabang B: elemen $q_{12} = 18$ kodi.<br>• Total kain katun premium seluruh pabrik = $30 + 18 = 48$ kodi. Jawaban: <strong>E</strong>."
+            },
+            {
+                id: 9,
+                filterCategory: "gambar3",
+                categoryTitle: "Gambar 3 - Pertanyaan 3",
+                type: "single",
+                context: "<strong>Teks 1 (Analisis Pernyataan Pabrik Tekstil):</strong><br>Diberikan data matriks $P = \\begin{pmatrix} 20 & 15 \\\\ 10 & 25 \\end{pmatrix}$ dan $Q = \\begin{pmatrix} 12 & 18 \\\\ 15 & 20 \\end{pmatrix}$.",
+                question: "Berdasarkan data matriks produksi tersebut, manakah pernyataan berikut yang BENAR?",
+                options: [
+                    "Jika $S = Q - P$, maka elemen $s_{11}$ adalah 5.",
+                    "Selisih produksi $P$ dan $Q$ pada kain sutra standar adalah 5 kodi.",
+                    "Determinan dari matriks $P$ bernilai 350.",
+                    "Jika $R = P + Q$, maka elemen $r_{21}$ adalah 25.",
+                    "Elemen $q_{12}$ pada matriks $Q$ adalah 15."
+                ],
+                correctAnswer: 2, // Index C (det(P) = 350)
+                explanation: "<strong>Pembahasan Evaluasi Pernyataan:</strong><br>• $S = Q - P \\implies s_{11} = 12 - 20 = -8$ (Salah).<br>• Sutra Standar (baris 2 kolom 1): Cabang A = 10, Cabang B = 15. Selisih = $|10 - 15| = 5$ kodi (Perhatikan detail lain).<br>• Determinan $P$: $\\det(P) = (20)(25) - (15)(10) = 500 - 150 = 350$. (<strong>BENAR</strong>). Jawaban: <strong>C</strong>."
+            },
+
+            // ==================== SOAL SERUPA (3 SOAL) ====================
+            {
+                id: 10,
+                filterCategory: "serupa",
+                categoryTitle: "Soal Serupa 1 - Sistem Linear Matriks",
+                type: "single",
+                context: "<strong>[Soal Pemantapan 1]:</strong><br>Sebuah toko alat tulis menjual Paket A (2 buku dan 1 pensil) seharga $\\text{Rp}12.000,00$ dan Paket B (3 buku dan 2 pensil) seharga $\\text{Rp}19.000,00$. Jika $x$ menyatakan harga 1 buku dan $y$ menyatakan harga 1 pensil.",
+                question: "Manakah matriks invers $A^{-1}$ dari persamaan matriks $AX = B$ untuk menyelesaikan masalah tersebut?",
+                options: [
+                    "$\\begin{pmatrix} 2 & -1 \\\\ -3 & 2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & -3 \\\\ -1 & 2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} -2 & 1 \\\\ 3 & -2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 1 & -2 \\\\ -3 & 2 \\end{pmatrix}$",
+                    "$\\begin{pmatrix} 2 & 1 \\\\ 3 & 2 \\end{pmatrix}$"
+                ],
+                correctAnswer: 0, // Index A
+                explanation: "<strong>Pembahasan:</strong><br>Model persamaan:<br>1) $2x + 1y = 12.000$<br>2) $3x + 2y = 19.000$<br><br>Matriks $A = \\begin{pmatrix} 2 & 1 \\\\ 3 & 2 \\end{pmatrix}$.<br>$\\det(A) = (2)(2) - (1)(3) = 4 - 3 = 1$.<br>Invers $A^{-1} = \\frac{1}{1} \\begin{pmatrix} 2 & -1 \\\\ -3 & 2 \\end{pmatrix} = \\begin{pmatrix} 2 & -1 \\\\ -3 & 2 \\end{pmatrix}$. Jawaban: <strong>A</strong>."
+            },
+            {
+                id: 11,
+                filterCategory: "serupa",
+                categoryTitle: "Soal Serupa 2 - Determinan Matriks 3x3 & Skalar",
+                type: "single",
+                context: "<strong>[Soal Pemantapan 2]:</strong><br>Diberikan matriks segitiga atas $M = \\begin{pmatrix} 2 & 1 & 0 \\\\ 0 & 3 & 1 \\\\ 0 & 0 & 2 \\end{pmatrix}$ berordo $3 \\times 3$.",
+                question: "Jika matriks $N = 2M$, berapakah nilai determinan dari matriks $N$?",
+                options: ["24", "48", "72", "96", "108"],
+                correctAnswer: 3, // Index D (96)
+                explanation: "<strong>Pembahasan:</strong><br>1) Determinan matriks segitiga $M$ = perkalian elemen diagonal utama:<br>$\\det(M) = 2 \\times 3 \\times 2 = 12$.<br><br>2) Karena $N = 2M$ dan ordo $n = 3$, maka:<br>$\\det(N) = \\det(2M) = 2^3 \\cdot \\det(M) = 8 \\cdot 12 = 96$. Jawaban: <strong>D</strong>."
+            },
+            {
+                id: 12,
+                filterCategory: "serupa",
+                categoryTitle: "Soal Serupa 3 - Operasi Matriks & Konteks",
+                type: "single",
+                context: "<strong>[Soal Pemantapan 3]:</strong><br>Sebuah toko sepatu memiliki dua cabang. Matriks penjualan Cabang I adalah $X = \\begin{pmatrix} 15 & 10 \\\\ 20 & 25 \\end{pmatrix}$ dan Cabang II adalah $Y = \\begin{pmatrix} 10 & 15 \\\\ 12 & 18 \\end{pmatrix}$ (baris 1 = Pria, baris 2 = Wanita; kolom 1 = Formal, kolom 2 = Olahraga).",
+                question: "Jika penjualan sepatu olahraga pria di Cabang I meningkat tiga kali lipat, berapa pasang total sepatu olahraga pria yang terjual di kedua cabang?",
+                options: ["30", "35", "40", "45", "50"],
+                correctAnswer: 3, // Index D (45)
+                explanation: "<strong>Pembahasan:</strong><br>• Sepatu Olahraga Pria berada pada Baris 1 Kolom 2.<br>• Cabang I ($x_{12} = 10$). Meningkat 3 kali lipat $\\implies 3 \\times 10 = 30$ pasang.<br>• Cabang II ($y_{12} = 15$ pasang).<br>• Total terjual = $30 + 15 = 45$ pasang. Jawaban: <strong>D</strong>."
+            }
+        ];
+
+        let activeQuestions = [...quizData];
+        let currentIndex = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let quizSubmitted = new Array(quizData.length).fill(false);
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let isAudioMuted = false;
+
+        // Web Audio API sound synthesis
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (isAudioMuted) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.setValueAtTime(174.61, audioCtx.currentTime + 0.15); // F3
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio playback restricted');
+            }
+        }
+
+        function renderMathInElementSafely(elem) {
+            if (window.renderMathInElement && elem) {
+                window.renderMathInElement(elem, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function initTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timerText').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function updateStats() {
+            let answered = 0;
+            let correct = 0;
+
+            quizSubmitted.forEach((isSub, idx) => {
+                if (isSub) {
+                    answered++;
+                    if (userAnswers[idx] === activeQuestions[idx].correctAnswer) {
+                        correct++;
+                    }
+                }
+            });
+
+            document.getElementById('progressText').innerText = `${currentIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById('scoreText').innerText = `${correct * 10} / ${activeQuestions.length * 10}`;
+            document.getElementById('answeredCount').innerText = `${answered}/${activeQuestions.length} Selesai`;
+            
+            const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+            document.getElementById('accuracyText').innerText = `${accuracy}%`;
+
+            const percent = ((currentIndex + 1) / activeQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+
+            renderQuestionGrid();
+        }
+
+        function renderQuestionGrid() {
+            const gridContainer = document.getElementById('questionGrid');
+            gridContainer.innerHTML = '';
+
+            activeQuestions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-10 h-10 rounded-xl font-bold text-xs transition flex items-center justify-center border `;
+                
+                if (idx === currentIndex) {
+                    btn.className += 'ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-slate-800 bg-brand-600 text-white border-transparent shadow';
+                } else if (quizSubmitted[idx]) {
+                    if (userAnswers[idx] === q.correctAnswer) {
+                        btn.className += 'bg-emerald-500 text-white border-transparent';
+                    } else {
+                        btn.className += 'bg-rose-500 text-white border-transparent';
+                    }
+                } else if (userAnswers[idx] !== null) {
+                    btn.className += 'bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 border-brand-300';
+                } else {
+                    btn.className += 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-200';
+                }
+
+                btn.innerText = idx + 1;
+                btn.onclick = () => {
+                    currentIndex = idx;
+                    loadCurrentQuestion();
+                };
+                gridContainer.appendChild(btn);
+            });
+        }
+
+        function loadCurrentQuestion() {
+            const q = activeQuestions[currentIndex];
+
+            document.getElementById('questionCategoryTag').innerText = q.categoryTitle;
+            document.getElementById('currentQNum').innerText = currentIndex + 1;
+            document.getElementById('totalQNum').innerText = activeQuestions.length;
+
+            const contextBox = document.getElementById('readingContextBox');
+            contextBox.innerHTML = q.context;
+            
+            const titleBox = document.getElementById('questionTitle');
+            titleBox.innerHTML = q.question;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const isSubmitted = quizSubmitted[currentIndex];
+            const selectedOpt = userAnswers[currentIndex];
+
+            q.options.forEach((optText, optIdx) => {
+                const label = document.createElement('label');
+                let borderClass = "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-brand-300 dark:hover:border-slate-600";
+                let badgeClass = "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
+
+                if (isSubmitted) {
+                    if (optIdx === q.correctAnswer) {
+                        borderClass = "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 font-medium";
+                        badgeClass = "bg-emerald-500 text-white";
+                    } else if (optIdx === selectedOpt) {
+                        borderClass = "border-rose-500 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200";
+                        badgeClass = "bg-rose-500 text-white";
+                    } else {
+                        borderClass = "border-slate-200 dark:border-slate-700 opacity-60 bg-white dark:bg-slate-800";
+                    }
+                } else if (selectedOpt === optIdx) {
+                    borderClass = "border-brand-500 bg-brand-50 dark:bg-brand-950/30 text-brand-900 dark:text-brand-100 font-medium ring-1 ring-brand-500";
+                    badgeClass = "bg-brand-600 text-white";
+                }
+
+                label.className = `flex items-center p-4 rounded-xl border-2 transition cursor-pointer gap-3 ${borderClass}`;
+                
+                const optionLetter = String.fromCharCode(65 + optIdx);
+                label.innerHTML = `
+                    <input type="radio" name="option" value="${optIdx}" class="hidden" ${selectedOpt === optIdx ? 'checked' : ''} ${isSubmitted ? 'disabled' : ''}>
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${badgeClass}">${optionLetter}</span>
+                    <span class="text-sm leading-snug flex-grow">${optText}</span>
+                `;
+
+                if (!isSubmitted) {
+                    label.onclick = () => {
+                        userAnswers[currentIndex] = optIdx;
+                        loadCurrentQuestion();
+                    };
+                }
+
+                optionsContainer.appendChild(label);
+            });
+
+            // Feedback Box
+            const feedbackBox = document.getElementById('feedbackBox');
+            if (isSubmitted) {
+                feedbackBox.classList.remove('hidden');
+                const isCorrect = selectedOpt === q.correctAnswer;
+                if (isCorrect) {
+                    feedbackBox.className = "rounded-xl p-5 border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 space-y-2";
+                    feedbackBox.innerHTML = `<div class="font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-circle-check text-lg"></i> Jawaban Anda Benar!</div><div>${q.explanation}</div>`;
+                } else {
+                    feedbackBox.className = "rounded-xl p-5 border border-rose-300 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 space-y-2";
+                    feedbackBox.innerHTML = `<div class="font-bold flex items-center gap-2 text-rose-600 dark:text-rose-400"><i class="fa-solid fa-circle-xmark text-lg"></i> Jawaban Belum Tepat!</div><div>${q.explanation}</div>`;
+                }
+            } else {
+                feedbackBox.classList.add('hidden');
+            }
+
+            // Buttons state
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (isSubmitted) {
+                submitBtn.classList.add('hidden');
+                nextBtn.classList.remove('hidden');
+            } else {
+                submitBtn.classList.remove('hidden');
+                submitBtn.disabled = selectedOpt === null;
+            }
+
+            if (currentIndex === activeQuestions.length - 1) {
+                nextBtn.querySelector('span').innerText = 'Selesai';
+            } else {
+                nextBtn.querySelector('span').innerText = 'Lanjut';
+            }
+
+            // Render LaTeX
+            renderMathInElementSafely(document.getElementById('readingContextBox'));
+            renderMathInElementSafely(document.getElementById('questionTitle'));
+            renderMathInElementSafely(document.getElementById('optionsContainer'));
+            renderMathInElementSafely(document.getElementById('feedbackBox'));
+
+            updateStats();
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            if (userAnswers[currentIndex] === null) return;
+            
+            quizSubmitted[currentIndex] = true;
+            const q = activeQuestions[currentIndex];
+            
+            if (userAnswers[currentIndex] === q.correctAnswer) {
+                playSound('correct');
+            } else {
+                playSound('incorrect');
+            }
+
+            loadCurrentQuestion();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentIndex < activeQuestions.length - 1) {
+                currentIndex++;
+                loadCurrentQuestion();
+            } else {
+                showFinalResults();
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadCurrentQuestion();
+            }
+        });
+
+        // Category Filter
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.category-btn').forEach(b => {
+                    b.className = "category-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition";
+                });
+                
+                e.target.className = "category-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-brand-600 text-white shadow-sm transition";
+
+                const filter = e.target.getAttribute('data-filter');
+                if (filter === 'all') {
+                    activeQuestions = [...quizData];
+                } else {
+                    activeQuestions = quizData.filter(q => q.filterCategory === filter);
+                }
+
+                currentIndex = 0;
+                userAnswers = new Array(activeQuestions.length).fill(null);
+                quizSubmitted = new Array(activeQuestions.length).fill(false);
+                loadCurrentQuestion();
+            });
+        });
+
+        // Restart Quiz
+        function resetQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(activeQuestions.length).fill(null);
+            quizSubmitted = new Array(activeQuestions.length).fill(false);
+            initTimer();
+            loadCurrentQuestion();
+        }
+
+        document.getElementById('restartBtn').addEventListener('click', resetQuiz);
+        document.getElementById('modalRestartBtn').addEventListener('click', () => {
+            hideResultModal();
+            resetQuiz();
+        });
+
+        document.getElementById('finishQuizBtn').addEventListener('click', () => {
+            showFinalResults();
+        });
+
+        // Result Modal logic
+        function showFinalResults() {
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            activeQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correctAnswer) correctCount++;
+            });
+
+            const total = activeQuestions.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            const score = percentage;
+
+            document.getElementById('finalScoreVal').innerText = score;
+            document.getElementById('finalCorrectVal').innerText = `${correctCount} / ${total}`;
+            
+            const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const secs = String(secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('finalTimeVal').innerText = `${mins}:${secs}`;
+
+            const iconBox = document.getElementById('resultIcon');
+            const feedbackText = document.getElementById('resultFeedbackText');
+
+            if (percentage >= 80) {
+                iconBox.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300";
+                iconBox.innerHTML = `<i class="fa-solid fa-trophy"></i>`;
+                feedbackText.innerHTML = `Luar biasa! Pemahaman Anda tentang materi <strong>Sistem Persamaan Matriks, Determinan, Invers, dan Operasi Matriks</strong> sangat matang.`;
+            } else if (percentage >= 50) {
+                iconBox.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300";
+                iconBox.innerHTML = `<i class="fa-solid fa-star"></i>`;
+                feedbackText.innerHTML = `Hasil yang cukup baik! Anda telah memahami konsep dasar. Cermati kembali soal-soal pembahasan untuk menyempurnakan jawaban Anda.`;
+            } else {
+                iconBox.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-300";
+                iconBox.innerHTML = `<i class="fa-solid fa-book-open"></i>`;
+                feedbackText.innerHTML = `Tetap semangat! Pelajari kembali pembahasan langkah demi langkah pada setiap nomor kuis ini untuk meningkatkan nilai Anda.`;
+            }
+
+            const modal = document.getElementById('resultModal');
+            const modalCard = document.getElementById('resultModalCard');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalCard.classList.remove('scale-95');
+                modalCard.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideResultModal() {
+            const modal = document.getElementById('resultModal');
+            const modalCard = document.getElementById('resultModalCard');
+            modal.classList.add('opacity-0');
+            modalCard.classList.remove('scale-100');
+            modalCard.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('closeModalBtn').addEventListener('click', hideResultModal);
+
+        // Sound Toggle
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            isAudioMuted = !isAudioMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isAudioMuted) {
+                icon.className = "fa-solid fa-volume-xmark text-slate-400";
+            } else {
+                icon.className = "fa-solid fa-volume-high text-slate-600 dark:text-slate-300";
+            }
+        });
+
+        // Theme Toggle (Dark/Light)
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Initialize App on load
+        window.onload = function() {
+            initTimer();
+            loadCurrentQuestion();
+        };
+    </script>
+</body>
+</html>
